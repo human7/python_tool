@@ -139,6 +139,5 @@ class Rename():
 
     
 if __name__ == "__main__":
-    #rename()
     t = Rename()
     t.run()

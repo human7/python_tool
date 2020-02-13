@@ -23,7 +23,8 @@ class GetNovelInfo():
                  timeout=10,
                  filePath='data.txt',
                  mode='w',
-                 fileEncode='utf-8'):
+                 fileEncode='utf-8',
+                 novelName=None):
         self.url = url
         self.timeout = timeout
         self.filePath = filePath
@@ -34,7 +35,8 @@ class GetNovelInfo():
         self.time_html = 600  # 重新更新 s
         self.CNT_getHtml = 0  # 爬取html的次数
         self.begin_time = datetime.datetime.now()
-
+        self.novelName = novelName  # 小说名字
+        
     # 运行
     def run(self):
         """
@@ -89,6 +91,8 @@ class GetNovelInfo():
         
         if(flg):
             print('\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+            if self.novelName != None:
+                print('\t',self.novelName)
             str_show = "\t更新了！！！\n%s\n最新更新时间: %s" % (
             self.li_dataInfo[0], self.li_dataInfo[1])
             print(str_show)
@@ -99,6 +103,8 @@ class GetNovelInfo():
             print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
         else:
             print('\n======================================')
+            if self.novelName != None:
+                print('\t',self.novelName)
             print( '%s\n\t没更新\n等待重新爬取数据\n已经爬取次数: %d'%(self.li_dataInfo[0], self.CNT_getHtml ))
             print('')
             print('起始时间: ',str_startTime)
@@ -288,13 +294,13 @@ if __name__ == "__main__":
         os.system(r"color 50")
         
         url = 'https://book.qidian.com/info/1014920025'
-        yuanZun = QiDian(url, filePath='yz.txt')
+        yuanZun = QiDian(url, filePath='yz.txt',novelName='元尊')
         yuanZun.run()
     elif choose == '1':
         os.system(r"color 24")
         
         url = 'http://book.zongheng.com/book/408586.html'
-        ntxs = ZongHeng(url, filePath='ntxs.txt')
+        ntxs = ZongHeng(url, filePath='ntxs.txt',novelName='逆天邪神')
         ntxs.run()
     else:
         print('选择错误')
