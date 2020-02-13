@@ -1,0 +1,10 @@
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.vscode
+
+# Python
+.ipynb*
+*.pyc
+__pycache__
