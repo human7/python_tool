@@ -4,7 +4,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import bs4
-import os
+import os,sys
 import time
 import winsound
 import datetime
@@ -17,7 +17,7 @@ def play_Beep(duration=500):
 
 
 
-class GetNovelInfo():
+class GetNovelUpdate():
     def __init__(self,
                  url,
                  timeout=10,
@@ -26,17 +26,20 @@ class GetNovelInfo():
                  fileEncode='utf-8',
                  novelName=None):
         self.url = url
-        self.timeout = timeout
+        self.timeout  = timeout       # 爬取超时
         self.filePath = filePath
-        self.mode = mode
+        self.mode     = mode
         self.fileEncode = fileEncode
         self.li_dataInfo = ['','','']  # 更新文本，更新时间, 章节号
-        self.time_show = 3   # 显示 s 提示更新了
-        self.time_html = 600  # 重新更新 s
-        self.CNT_getHtml = 0  # 爬取html的次数
-        self.begin_time = datetime.datetime.now()
-        self.novelName = novelName  # 小说名字
         
+        self.begin_time = datetime.datetime.now()
+        self.novelName  = novelName  # 小说名字
+        
+        self.time_show      = 3    # 显示 s 提示更新了
+        self.time_html      = 600  # 重新更新 s
+        self.time_reGetHtml = 10   # 等待一段时间在重新爬取
+        self.CNT_getHtml    = 0    # 爬取html的次数
+
     # 运行
     def run(self):
         """
@@ -47,7 +50,7 @@ class GetNovelInfo():
         # ######################################################
         #                循环运行  begin
         # ######################################################
-        isUpdate = False  # 是否更新        
+        isUpdate = False  # 是否更新
         while(not isUpdate):
             # ============================================
             # step1.爬取解析网页，如果失败，继续爬取＋解析
@@ -56,6 +59,7 @@ class GetNovelInfo():
             while(not ret):
                 ret = self.parseHtml()  # 如果解析失败 一直解析
                 self.CNT_getHtml = self.CNT_getHtml + 1  # 爬取次数
+                time.sleep(self.time_reGetHtml)  # 等待一段时间在重新爬取
             
             # ============================================
             # step2.与本地保存的文本进行对比，如果更新了，循环提示
@@ -89,10 +93,16 @@ class GetNovelInfo():
         str_endTime   = self.end_time.strftime('%H:%M:%S')
         str_runTime   = str(self.end_time - self.begin_time)
         
+        str_c1 = "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"  # 更新了     的 分界线
+        str_c2 = "========================================"  # 没有更新了 的 分界线
+        str_c3 = "----------------------------------------"  # 分界线
         if(flg):
-            print('\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-            if self.novelName != None:
+            # 更新了
+            print('\n%s'%str_c1)  # 分界线 $$$$
+            if self.novelName != None:  # 如果有名字
                 print('\t',self.novelName)
+                print(str_c3)     # 分界线 ----
+
             str_show = "\t更新了！！！\n%s\n最新更新时间: %s" % (
             self.li_dataInfo[0], self.li_dataInfo[1])
             print(str_show)
@@ -100,17 +110,21 @@ class GetNovelInfo():
             print('起始时间: ',str_startTime)
             print('当前时间: ',str_endTime)
             print('运行时间: ',str_runTime)
-            print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+            print('%s\n'%str_c1)  # 分界线 $$$$
         else:
-            print('\n======================================')
-            if self.novelName != None:
+            # 没有更新
+            print('\n%s'%str_c2)  # 分界线 ====
+            if self.novelName != None:  # 如果有名字
                 print('\t',self.novelName)
+                print(str_c3)     # 分界线 ----
+
             print( '%s\n\t没更新\n等待重新爬取数据\n已经爬取次数: %d'%(self.li_dataInfo[0], self.CNT_getHtml ))
+            print('更新时间: %s'%self.li_dataInfo[1])
             print('')
             print('起始时间: ',str_startTime)
             print('当前时间: ',str_endTime)
             print('运行时间: ',str_runTime)
-            print('======================================\n')
+            print('%s\n'%str_c2)  # 分界线 ===
 
     # 读文本文件
     def readText(self):
@@ -173,8 +187,7 @@ class GetNovelInfo():
             self.li_dataInfo[1] = lastUpdateTime  # 最新更新时间
             self.li_dataInfo[2] = chapterID       # 章节号
             
-            # 保存更新文本信息--用于对比
-            #self.show_save_Info()
+
             return True  # 解析成功
 
         except:
@@ -194,7 +207,7 @@ class GetNovelInfo():
             return True
         
 
-class QiDian(GetNovelInfo):
+class QiDianUpdate(GetNovelUpdate):
     # ============================
     # 针对起点网的更新
     # 继承类-重写解析html函数
@@ -228,8 +241,7 @@ class QiDian(GetNovelInfo):
             self.li_dataInfo[1] = lastUpdateTime  # 最新更新时间
             self.li_dataInfo[2] = chapterID       # 章节号
             
-            # 保存更新文本信息--用于对比
-            #self.show_save_Info()
+  
             return True  # 解析成功
 
         except:
@@ -238,7 +250,7 @@ class QiDian(GetNovelInfo):
 
 
 
-class ZongHeng(GetNovelInfo):
+class ZongHengUpdate(GetNovelUpdate):
     # ============================
     # 针对纵横网的更新
     # 继承类-重写解析html函数
@@ -263,8 +275,7 @@ class ZongHeng(GetNovelInfo):
             self.li_dataInfo[2] = chapterID       # 章节号
             
             #print(self.li_dataInfo)
-            # 保存更新文本信息--用于对比
-            #self.show_save_Info()
+
             return True  # 解析成功
 
         except:
@@ -273,12 +284,15 @@ class ZongHeng(GetNovelInfo):
 
 if __name__ == "__main__":
 
+    os.chdir(sys.path[0])  # 改变目录
+
 
 
 
     strshow = """爬取数据选择:
 [0].元尊
-[1].逆天邪神\n
+[1].逆天邪神
+[2].斗罗大陆IV\n
 你的选择是："""
     choose = input(strshow)
 
@@ -294,14 +308,17 @@ if __name__ == "__main__":
         os.system(r"color 50")
         
         url = 'https://book.qidian.com/info/1014920025'
-        yuanZun = QiDian(url, filePath='yz.txt',novelName='元尊')
+        yuanZun = QiDianUpdate(url, filePath='yz.txt',novelName='元尊')
         yuanZun.run()
     elif choose == '1':
-        os.system(r"color 24")
-        
+        os.system(r"color 24")        
         url = 'http://book.zongheng.com/book/408586.html'
-        ntxs = ZongHeng(url, filePath='ntxs.txt',novelName='逆天邪神')
+        ntxs = ZongHengUpdate(url, filePath='ntxs.txt',novelName='逆天邪神')
         ntxs.run()
+    elif choose == '2':
+        url = 'https://book.qidian.com/info/1013406185'
+        dldl = QiDianUpdate(url, filePath='dldl_IV.txt',novelName='斗罗大陆IV')
+        dldl.run()
     else:
         print('选择错误')
     

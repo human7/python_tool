@@ -1,0 +1,4 @@
+::-----
+python getFundInfo.py
+
+pause()
