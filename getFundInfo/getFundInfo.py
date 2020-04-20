@@ -1,4 +1,3 @@
-
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -35,7 +34,7 @@ class GetFundInfo():
         # holdShare:     持有基金的份额
         # holdCostPrice: 持仓成本价
         self.holdInfo = [holdShare, holdCostPrice]
-        
+
 
 
 
@@ -47,7 +46,7 @@ class GetFundInfo():
     def run(self):
         """
         程序的运行主程序
-        获取基金的信息，计算其值        
+        获取基金的信息，计算其值
         """
         
         # Step1.爬取数据
@@ -106,7 +105,9 @@ class GetFundInfo():
         
         # step2. 显示
         strShow = """====================================
-%s\t\t%s
+%s
+%s
+------------------------------------
         涨   幅：%s
         持有份额：%f
         购入价格：%f,\t购入资金：%f
@@ -195,7 +196,7 @@ class GetFundInfo():
 
 
 
-        
+
 
 class XueQiu(GetFundInfo):
     # ============================
@@ -225,8 +226,8 @@ class XueQiu(GetFundInfo):
             self.stock_info[1] = stock_current
             self.stock_info[2] = stock_change
             self.stock_info[3] = stock_time
-            
-  
+
+
             return True  # 解析成功
 
         except:
@@ -234,29 +235,29 @@ class XueQiu(GetFundInfo):
             return False  # 解析失败
 
 
-if __name__ == "__main__":    
-    
+if __name__ == "__main__":
+
     # 改变目录
     os.chdir(sys.path[0])
 
 
     # 华安标普全球石油
     url = 'https://xueqiu.com/S/F160416'
-    xq = XueQiu(url, holdShare=170.1535, holdCostPrice=0.5877)
+    xq = XueQiu(url, holdShare=17015.35, holdCostPrice=0.5877)
     earn_money1 = xq.run()
 
     # 嘉实原油
     url = 'https://xueqiu.com/S/F160723'
-    xq = XueQiu(url, holdShare=53.4405, holdCostPrice=0.7485)
+    xq = XueQiu(url, holdShare=5344.05, holdCostPrice=0.7485)
     earn_money2 = xq.run()
 
 
     # 南方原油
     url = 'https://xueqiu.com/S/F006476'
-    xq = XueQiu(url, holdShare=13.7893, holdCostPrice=0.7252)
+    xq = XueQiu(url, holdShare=1378.93, holdCostPrice=0.7252)
     earn_money3 = xq.run()
 
+    # 合集
     earnMoneyAll = earn_money1 + earn_money2 + earn_money3
-
     print("合计盈余：%f\n"%earnMoneyAll)
 
